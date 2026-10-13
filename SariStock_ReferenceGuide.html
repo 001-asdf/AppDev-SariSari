@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SariStock - Sari-Sari Store Inventory</title>
+    <!-- Tailwind CSS for modern mobile-first design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for clear icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sari: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar and mobile frame styling */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 font-sans text-slate-800 antialiased min-h-screen flex items-center justify-center p-0 sm:p-4">
+
+    <div id="app-container" class="w-full sm:max-w-[420px] h-screen sm:h-[850px] bg-slate-50 shadow-2xl sm:rounded-3xl flex flex-col relative overflow-hidden border-0 sm:border-8 sm:border-slate-800">
+        
+        <!-- Android Status Bar Header -->
+        <div class="bg-sari-800 text-white px-4 py-2 text-xs flex justify-between items-center select-none shrink-0 z-20">
+            <div class="flex items-center space-x-2">
+                <span id="status-time" class="font-semibold">9:41</span>
+                <span class="bg-sari-700 px-1.5 py-0.5 rounded text-[10px] tracking-wide uppercase font-medium">SariStock PH</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-signal text-[10px]"></i>
+                <i class="fa-solid fa-wifi text-[10px]"></i>
+                <i class="fa-solid fa-battery-three-quarters text-xs text-sari-300"></i>
+            </div>
+        </div>
+
+        <!-- App Header Bar -->
+        <header class="bg-sari-700 text-white px-4 py-3 shadow-md flex justify-between items-center shrink-0 z-20">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center font-bold text-lg border border-white/20 shadow-inner">
+                    <i class="fa-solid fa-store text-sari-100"></i>
+                </div>
+                <div>
+                    <h1 id="header-store-name" class="font-bold text-base leading-tight tracking-tight truncate max-w-[200px]">Aling Nena's Store</h1>
+                    <p class="text-xs text-sari-100 font-medium">Inventory & Sales</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="switchTab('settings')" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 transition flex items-center justify-center text-white" title="Settings">
+                    <i class="fa-solid fa-gear text-sm"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area (Scrollable Screens) -->
+        <main id="main-content" class="flex-1 overflow-y-auto relative pb-20">
+            <!-- Dynamic Screens will be rendered here via JavaScript -->
+        </main>
+
+        <!-- Bottom Navigation Bar -->
+        <nav class="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-200 h-16 px-2 flex justify-around items-center z-30 shadow-lg">
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="flex flex-col items-center justify-center flex-1 py-1 text-sari-700 transition">
+                <i class="fa-solid fa-house text-lg mb-0.5"></i>
+                <span class="text-[10px] font-semibold">Home</span>
+            </button>
+            <button onclick="switchTab('inventory')" id="nav-inventory" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-400 hover:text-sari-700 transition">
+                <i class="fa-solid fa-boxes-stacked text-lg mb-0.5"></i>
+                <span class="text-[10px] font-medium">Inventory</span>
+            </button>
+            <button onclick="switchTab('sale')" id="nav-sale" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-400 hover:text-sari-700 transition">
+                <div class="w-9 h-9 bg-sari-600 rounded-full flex items-center justify-center text-white shadow-md -mt-3 ring-4 ring-white">
+                    <i class="fa-solid fa-cash-register text-sm"></i>
+                </div>
+                <span class="text-[10px] font-medium mt-0.5">Sell</span>
+            </button>
+            <button onclick="switchTab('restock')" id="nav-restock" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-400 hover:text-sari-700 transition">
+                <i class="fa-solid fa-truck-ramp-box text-lg mb-0.5"></i>
+                <span class="text-[10px] font-medium">Restock</span>
+            </button>
+            <button onclick="switchTab('history')" id="nav-history" class="flex flex-col items-center justify-center flex-1 py-1 text-slate-400 hover:text-sari-700 transition">
+                <i class="fa-solid fa-receipt text-lg mb-0.5"></i>
+                <span class="text-[10px] font-medium">History</span>
+            </button>
+        </nav>
+
+        <!-- Global Toast Notification Banner -->
+        <div id="toast-container" class="absolute top-14 left-4 right-4 z-50 pointer-events-none flex flex-col space-y-2 items-center"></div>
+
+        <!-- Global Modal Container -->
+        <div id="modal-container" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4"></div>
+
+    </div>
+
+    <script>
+        // Default initial data for Philippine sari-sari store
+        const DEFAULT_SETTINGS = {
+            storeName: "Aling Nena's Store",
+            ownerName: "Nena Santos",
+            lowStockThreshold: 5
+        };
+
+        const DEFAULT_PRODUCTS = [
+            { id: "p1", name: "Lucky Me! Pancit Canton Kalamansi", category: "Noodles", costPrice: 12.00, sellingPrice: 15.00, stock: 24, minStock: 5 },
+            { id: "p2", name: "San Miguel Pale Pilsen 330ml", category: "Beverages", costPrice: 48.00, sellingPrice: 60.00, stock: 3, minStock: 6 },
+            { id: "p3", name: "C2 Green Tea Apple 500ml", category: "Beverages", costPrice: 22.00, sellingPrice: 28.00, stock: 15, minStock: 5 },
+            { id: "p4", name: "Kopiko Brown Coffee Sachet", category: "Coffee", costPrice: 6.50, sellingPrice: 8.50, stock: 4, minStock: 10 },
+            { id: "p5", name: "Surf Powder Detergent 60g", category: "Household", costPrice: 7.00, sellingPrice: 9.00, stock: 18, minStock: 5 },
+            { id: "p6", name: "Century Tuna Flakes in Oil 155g", category: "Canned Goods", costPrice: 35.00, sellingPrice: 42.00, stock: 2, minStock: 4 },
+            { id: "p7", name: "Mega Sardines Tomato Sauce 155g", category: "Canned Goods", costPrice: 20.00, sellingPrice: 25.00, stock: 12, minStock: 5 },
+            { id: "p8", name: "Piattos Cheese 85g", category: "Snacks", costPrice: 32.00, sellingPrice: 38.00, stock: 8, minStock: 5 }
+        ];
+
+        const DEFAULT_SALES = [
+            {
+                id: "s1",
+                timestamp: new Date(Date.now() - 3600000 * 2).toISOString(),
+                items: [{ productId: "p1", name: "Lucky Me! Pancit Canton Kalamansi", qty: 3, price: 15.00, cost: 12.00 }],
+                totalRevenue: 45.00,
+                totalProfit: 9.00
+            },
+            {
+                id: "s2",
+                timestamp: new Date(Date.now() - 3600000 * 5).toISOString(),
+                items: [{ productId: "p3", name: "C2 Green Tea Apple 500ml", qty: 2, price: 28.00, cost: 22.00 }],
+                totalRevenue: 56.00,
+                totalProfit: 12.00
+            }
+        ];
+
+        // App State
+        let currentTab = 'dashboard';
+        let storeSettings = JSON.parse(localStorage.getItem('saristock_settings')) || DEFAULT_SETTINGS;
+        let products = JSON.parse(localStorage.getItem('saristock_products')) || DEFAULT_PRODUCTS;
+        let salesHistory = JSON.parse(localStorage.getItem('saristock_sales')) || DEFAULT_SALES;
+
+        // Categories for products
+        const CATEGORIES = ["Noodles", "Canned Goods", "Beverages", "Coffee", "Household", "Snacks", "Condiments", "Personal Care", "Others"];
+
+        // Save state to localStorage
+        function saveData() {
+            localStorage.setItem('saristock_settings', JSON.stringify(storeSettings));
+            localStorage.setItem('saristock_products', JSON.stringify(products));
+            localStorage.setItem('saristock_sales', JSON.stringify(salesHistory));
+        }
+
+        // Clock update
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            hours = hours % 12 || 12;
+            document.getElementById('status-time').innerText = `${hours}:${minutes}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const bgClass = type === 'success' ? 'bg-emerald-600 text-white' : (type === 'error' ? 'bg-rose-600 text-white' : 'bg-slate-800 text-white');
+            const icon = type === 'success' ? 'fa-circle-check' : (type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-info');
+            
+            toast.className = `${bgClass} px-4 py-2.5 rounded-xl shadow-lg text-xs font-medium flex items-center space-x-2.5 transition-all duration-300 transform translate-y-[-10px] opacity-0 pointer-events-auto`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-sm"></i><span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-[-10px]', 'opacity-0');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-[-10px]', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function switchTab(tabId) {
+            currentTab = tabId;
+            
+            // Update Navigation active state
+            ['dashboard', 'inventory', 'sale', 'restock', 'history'].forEach(t => {
+                const navBtn = document.getElementById(`nav-${t}`);
+                if (!navBtn) return;
+                if (t === tabId) {
+                    if (t === 'sale') {
+                        navBtn.querySelector('div').classList.add('ring-sari-100');
+                    } else {
+                        navBtn.className = "flex flex-col items-center justify-center flex-1 py-1 text-sari-700 transition font-bold";
+                    }
+                } else {
+                    if (t === 'sale') {
+                        navBtn.querySelector('div').classList.remove('ring-sari-100');
+                    } else {
+                        navBtn.className = "flex flex-col items-center justify-center flex-1 py-1 text-slate-400 hover:text-sari-700 transition";
+                    }
+                }
+            });
+
+            // Update Store Name in header
+            document.getElementById('header-store-name').innerText = storeSettings.storeName;
+
+            renderScreen();
+        }
+
+        function renderScreen() {
+            const main = document.getElementById('main-content');
+            main.innerHTML = '';
+
+            switch(currentTab) {
+                case 'dashboard':
+                    renderDashboard(main);
+                    break;
+                case 'inventory':
+                    renderInventory(main);
+                    break;
+                case 'sale':
+                    renderSaleScreen(main);
+                    break;
+                case 'restock':
+                    renderRestockScreen(main);
+                    break;
+                case 'history':
+                    renderHistoryScreen(main);
+                    break;
+                case 'settings':
+                    renderSettingsScreen(main);
+                    break;
+                default:
+                    renderDashboard(main);
+            }
+        }
+
+        // Helper for currency formatting
+        function formatPeso(amount) {
+            return '₱' + Number(amount).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        // Helper to check stock status
+        function getStockStatus(product) {
+            if (product.stock === 0) return { label: 'Out of Stock', color: 'bg-rose-100 text-rose-700 border-rose-200' };
+            if (product.stock <= (product.minStock || storeSettings.lowStockThreshold)) return { label: 'Low Stock', color: 'bg-amber-100 text-amber-700 border-amber-200' };
+            return { label: 'Normal', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' };
+        }
+
+        function renderDashboard(container) {
+            // Calculate metrics for today
+            const todayStr = new Date().toDateString();
+            const todaySales = salesHistory.filter(s => new Date(s.timestamp).toDateString() === todayStr);
+            const todayRevenue = todaySales.reduce((acc, curr) => acc + curr.totalRevenue, 0);
+            
+            const lowStockItems = products.filter(p => p.stock <= (p.minStock || storeSettings.lowStockThreshold));
+            const totalProductsCount = products.length;
+
+            container.innerHTML = `
+                <div class="p-4 space-y-4 animate-fade-in">
+                    <!-- Greeting Card -->
+                    <div class="bg-gradient-to-r from-sari-700 to-sari-600 rounded-2xl p-4 text-white shadow-md relative overflow-hidden">
+                        <div class="absolute -right-6 -bottom-6 text-white/10 text-8xl pointer-events-none">
+                            <i class="fa-solid fa-store"></i>
+                        </div>
+                        <p class="text-xs text-sari-100 font-medium uppercase tracking-wider">Welcome back</p>
+                        <h2 class="text-xl font-bold mt-0.5">Magandang araw, ${storeSettings.ownerName}! 👋</h2>
+                        <p class="text-xs text-sari-100 mt-1"><i class="fa-solid fa-location-dot mr-1"></i> ${storeSettings.storeName}</p>
+                        
+                        <div class="mt-4 pt-3 border-t border-white/15 flex justify-between items-center text-xs">
+                            <span>Today's Transactions: <strong class="text-white">${todaySales.length}</strong></span>
+                            <button onclick="switchTab('sale')" class="bg-white text-sari-800 font-semibold px-3 py-1.5 rounded-lg shadow hover:bg-sari-50 transition flex items-center space-x-1">
+                                <i class="fa-solid fa-cash-register"></i>
+                                <span>Record Sale</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Summary Cards Grid -->
+                    <div class="grid grid-cols-3 gap-2.5">
+                        <div onclick="switchTab('inventory')" class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between cursor-pointer hover:border-sari-500 transition">
+                            <div class="text-slate-400 text-xs flex justify-between items-center">
+                                <span>Products</span>
+                                <i class="fa-solid fa-box text-sari-600"></i>
+                            </div>
+                            <div class="mt-2">
+                                <span class="text-lg font-bold text-slate-800">${totalProductsCount}</span>
+                                <p class="text-[10px] text-slate-500">items listed</p>
+                            </div>
+                        </div>
+
+                        <div onclick="switchTab('restock')" class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between cursor-pointer hover:border-amber-500 transition">
+                            <div class="text-slate-400 text-xs flex justify-between items-center">
+                                <span>Low Stock</span>
+                                <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
+                            </div>
+                            <div class="mt-2">
+                                <span class="text-lg font-bold ${lowStockItems.length > 0 ? 'text-amber-600' : 'text-slate-800'}">${lowStockItems.length}</span>
+                                <p class="text-[10px] text-slate-500">needs restock</p>
+                            </div>
+                        </div>
+
+                        <div onclick="switchTab('history')" class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between cursor-pointer hover:border-emerald-500 transition">
+                            <div class="text-slate-400 text-xs flex justify-between items-center">
+                                <span>Sales Today</span>
+                                <i class="fa-solid fa-peso-sign text-emerald-600"></i>
+                            </div>
+                            <div class="mt-2">
+                                <span class="text-sm font-bold text-emerald-600 truncate block">${formatPeso(todayRevenue)}</span>
+                                <p class="text-[10px] text-slate-500">revenue</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Action Buttons -->
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <button onclick="openProductModal()" class="bg-emerald-50 border border-emerald-200 text-emerald-800 p-2.5 rounded-xl font-semibold text-xs flex items-center justify-center space-x-2 hover:bg-emerald-100 transition shadow-sm">
+                            <i class="fa-solid fa-circle-plus text-emerald-600 text-sm"></i>
+                            <span>Add New Product</span>
+                        </button>
+                        <button onclick="switchTab('restock')" class="bg-amber-50 border border-amber-200 text-amber-800 p-2.5 rounded-xl font-semibold text-xs flex items-center justify-center space-x-2 hover:bg-amber-100 transition shadow-sm">
+                            <i class="fa-solid fa-truck-fast text-amber-600 text-sm"></i>
+                            <span>Restock Inventory</span>
+                        </button>
+                    </div>
+
+                    <!-- Low Stock Alert Section -->
+                    <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-bold text-slate-800 text-sm flex items-center space-x-2">
+                                <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
+                                <span>Low Stock Alert</span>
+                            </h3>
+                            <button onclick="switchTab('restock')" class="text-xs text-sari-700 font-semibold hover:underline">View All</button>
+                        </div>
+
+                        ${lowStockItems.length === 0 ? `
+                            <div class="text-center py-6 text-slate-400">
+                                <i class="fa-solid fa-face-smile text-3xl mb-1 text-emerald-500"></i>
+                                <p class="text-xs font-medium text-slate-600">All product stocks are sufficient!</p>
+                            </div>
+                        ` : `
+                            <div class="space-y-2.5">
+                                ${lowStockItems.slice(0, 4).map(item => {
+                                    const status = getStockStatus(item);
+                                    return `
+                                        <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                                            <div class="min-w-0 flex-1 mr-2">
+                                                <h4 class="font-semibold text-xs text-slate-800 truncate">${item.name}</h4>
+                                                <div class="flex items-center space-x-2 mt-0.5">
+                                                    <span class="text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded">${item.category}</span>
+                                                    <span class="text-[10px] font-bold text-rose-600">Qty: ${item.stock} left</span>
+                                                </div>
+                                            </div>
+                                            <button onclick="openRestockModal('${item.id}')" class="bg-sari-600 hover:bg-sari-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition shrink-0">
+                                                Restock
+                                            </button>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        `}
+                    </div>
+
+                    <!-- Recent Activity Feed -->
+                    <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="font-bold text-slate-800 text-sm flex items-center space-x-2">
+                                <i class="fa-solid fa-clock-rotate-left text-sari-600"></i>
+                                <span>Recent Sales Activity</span>
+                            </h3>
+                            <button onclick="switchTab('history')" class="text-xs text-sari-700 font-semibold hover:underline">History</button>
+                        </div>
+
+                        ${salesHistory.length === 0 ? `
+                            <p class="text-xs text-slate-400 text-center py-4">No sales recorded yet.</p>
+                        ` : `
+                            <div class="space-y-2">
+                                ${salesHistory.slice(0, 3).map(sale => {
+                                    const time = new Date(sale.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                    const itemDesc = sale.items.map(i => `${i.qty}x ${i.name}`).join(', ');
+                                    return `
+                                        <div class="flex justify-between items-center text-xs p-2 bg-slate-50 rounded-lg">
+                                            <div class="truncate mr-2 flex-1">
+                                                <p class="font-semibold text-slate-800 truncate">${itemDesc}</p>
+                                                <span class="text-[10px] text-slate-400">${time}</span>
+                                            </div>
+                                            <div class="text-right shrink-0">
+                                                <span class="font-bold text-emerald-600">${formatPeso(sale.totalRevenue)}</span>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        `}
+                    </div>
+                </div>
+            `;
+        }
+
+        let inventorySearchQuery = "";
+        let inventoryCategoryFilter = "All";
+
+        function renderInventory(container) {
+            const filteredProducts = products.filter(p => {
+                const matchesSearch = p.name.toLowerCase().includes(inventorySearchQuery.toLowerCase()) || p.category.toLowerCase().includes(inventorySearchQuery.toLowerCase());
+                const matchesCategory = inventoryCategoryFilter === "All" || p.category === inventoryCategoryFilter;
+                return matchesSearch && matchesCategory;
+            });
+
+            container.innerHTML = `
+                <div class="p-4 space-y-3 animate-fade-in">
+                    <!-- Top Bar: Title & Add Button -->
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800">Inventory Management</h2>
+                            <p class="text-xs text-slate-500">${products.length} total items registered</p>
+                        </div>
+                        <button onclick="openProductModal()" class="bg-sari-600 hover:bg-sari-700 text-white px-3 py-2 rounded-xl text-xs font-semibold shadow-sm flex items-center space-x-1.5 transition">
+                            <i class="fa-solid fa-plus text-xs"></i>
+                            <span>Add Product</span>
+                        </button>
+                    </div>
+
+                    <!-- Search and Filter Bar -->
+                    <div class="space-y-2">
+                        <div class="relative">
+                            <i class="fa-solid fa-search absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                            <input type="text" id="inventory-search" value="${inventorySearchQuery}" oninput="handleInventorySearch(this.value)" placeholder="Search products or category..." class="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-800 focus:outline-none focus:border-sari-600 shadow-sm">
+                        </div>
+
+                        <!-- Category Filters Horizontal Scroll -->
+                        <div class="flex space-x-1.5 overflow-x-auto hide-scrollbar pb-1">
+                            <button onclick="filterCategory('All')" class="px-3 py-1 rounded-full text-xs font-medium shrink-0 transition ${inventoryCategoryFilter === 'All' ? 'bg-sari-700 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">All</button>
+                            ${CATEGORIES.map(cat => `
+                                <button onclick="filterCategory('${cat}')" class="px-3 py-1 rounded-full text-xs font-medium shrink-0 transition ${inventoryCategoryFilter === cat ? 'bg-sari-700 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">${cat}</button>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Product List -->
+                    <div class="space-y-2.5 pt-1">
+                        ${filteredProducts.length === 0 ? `
+                            <div class="text-center py-12 bg-white rounded-2xl border border-slate-200 p-6">
+                                <i class="fa-solid fa-box-open text-4xl text-slate-300 mb-2"></i>
+                                <h3 class="font-bold text-slate-700 text-sm">No products found</h3>
+                                <p class="text-xs text-slate-400 mt-1">Try adjusting your search or category filter.</p>
+                            </div>
+                        ` : `
+                            filteredProducts.map(product => {
+                                const status = getStockStatus(product);
+                                return '';
+                            })
+                            <div class="space-y-2">
+                                ${filteredProducts.map(product => {
+                                    const status = getStockStatus(product);
+                                    return `
+                                        <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm flex items-center justify-between">
+                                            <div class="min-w-0 flex-1 mr-3">
+                                                <div class="flex items-center space-x-2 mb-1">
+                                                    <span class="text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded">${product.category}</span>
+                                                    <span class="text-[10px] font-medium px-2 py-0.5 rounded border ${status.color}">${status.label}</span>
+                                                </div>
+                                                <h4 class="font-bold text-slate-800 text-xs truncate">${product.name}</h4>
+                                                <div class="flex items-center space-x-3 mt-1 text-xs">
+                                                    <span class="text-sari-700 font-bold">Sell: ${formatPeso(product.sellingPrice)}</span>
+                                                    <span class="text-slate-400">|</span>
+                                                    <span class="text-slate-500">Cost: ${formatPeso(product.costPrice)}</span>
+                                                    <span class="text-slate-400">|</span>
+                                                    <span class="font-semibold text-slate-700">Stock: ${product.stock}</span>
+                                                </div>
+                                            </div>
+                                            <div class="flex flex-col space-y-1.5 shrink-0">
+                                                <button onclick="openProductModal('${product.id}')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center transition" title="Edit Product">
+                                                    <i class="fa-solid fa-pen text-xs"></i>
+                                                </button>
+                                                <button onclick="confirmDeleteProduct('${product.id}')" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center justify-center transition" title="Delete Product">
+                                                    <i class="fa-solid fa-trash text-xs"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        `}
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleInventorySearch(val) {
+            inventorySearchQuery = val;
+            // Re-render without full screen redraw to retain focus
+            const container = document.getElementById('main-content');
+            renderInventory(container);
+            // Restore focus
+            const input = document.getElementById('inventory-search');
+            if (input) {
+                input.focus();
+                input.setSelectionRange(input.value.length, input.value.length);
+            }
+        }
+
+        function filterCategory(cat) {
+            inventoryCategoryFilter = cat;
+            renderScreen();
+        }
+
+        function openProductModal(productId = null) {
+            const isEdit = productId !== null;
+            let product = { name: '', category: 'Noodles', costPrice: '', sellingPrice: '', stock: '', minStock: storeSettings.lowStockThreshold };
+            
+            if (isEdit) {
+                const found = products.find(p => p.id === productId);
+                if (found) product = { ...found };
+            }
+
+            const modal = document.getElementById('modal-container');
+            modal.classList.remove('hidden');
+            modal.innerHTML = `
+                <div class="bg-white rounded-3xl w-full max-w-sm p-5 shadow-2xl border border-slate-100 animate-scale-up">
+                    <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center space-x-2">
+                            <i class="fa-solid ${isEdit ? 'fa-pen-to-square text-sari-600' : 'fa-circle-plus text-emerald-600'}"></i>
+                            <span>${isEdit ? 'Edit Product' : 'Add New Product'}</span>
+                        </h3>
+                        <button onclick="closeModal()" class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center transition">
+                            <i class="fa-solid fa-xmark text-xs"></i>
+                        </button>
+                    </div>
+
+                    <form onsubmit="handleSaveProduct(event, '${productId || ''}')" class="space-y-3">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Product Name</label>
+                            <input type="text" id="prod-name" required value="${product.name}" placeholder="e.g., Century Tuna 155g" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-sari-600">
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Category</label>
+                            <select id="prod-category" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-sari-600">
+                                ${CATEGORIES.map(cat => `<option value="${cat}" ${product.category === cat ? 'selected' : ''}>${cat}</option>`).join('')}
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Cost Price (₱)</label>
+                                <input type="number" step="0.05" min="0" id="prod-cost" required value="${product.costPrice}" placeholder="0.00" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-sari-600">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Selling Price (₱)</label>
+                                <input type="number" step="0.05" min="0" id="prod-sell" required value="${product.sellingPrice}" placeholder="0.00" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-sari-600">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Initial Stock</label>
+                                <input type="number" min="0" id="prod-stock" required value="${product.stock}" placeholder="0" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-sari-600">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Low Alert Level</label>
+                                <input type="number" min="1" id="prod-min" required value="${product.minStock}" placeholder="5" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-sari-600">
+                            </div>
+                        </div>
+
+                        <div class="flex space-x-2 pt-2">
+                            <button type="button" onclick="closeModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-xl text-xs font-semibold transition">Cancel</button>
+                            <button type="submit" class="flex-1 bg-sari-600 hover:bg-sari-700 text-white py-2.5 rounded-xl text-xs font-semibold shadow transition">Save Product</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+        }
+
+        function handleSaveProduct(e, productId) {
+            e.preventDefault();
+            const name = document.getElementById('prod-name').value.trim();
+            const category = document.getElementById('prod-category').value;
+            const costPrice = parseFloat(document.getElementById('prod-cost').value);
+            const sellingPrice = parseFloat(document.getElementById('prod-sell').value);
+            const stock = parseInt(document.getElementById('prod-stock').value);
+            const minStock = parseInt(document.getElementById('prod-min').value);
+
+            if (costPrice >= sellingPrice) {
+                showToast('Selling price should be higher than cost price!', 'error');
+                return;
+            }
+
+            if (productId) {
+                // Edit
+                const index = products.findIndex(p => p.id === productId);
+                if (index !== -1) {
+                    products[index] = { ...products[index], name, category, costPrice, sellingPrice, stock, minStock };
+                    showToast('Product updated successfully!');
+                }
+            } else {
+                // Add
+                const newProduct = {
+                    id: 'p_' + Date.now(),
+                    name,
+                    category,
+                    costPrice,
+                    sellingPrice,
+                    stock,
+                    minStock
+                };
+                products.unshift(newProduct);
+                showToast('New product added successfully!');
+            }
+
+            saveData();
+            closeModal();
+            renderScreen();
+        }
+
+        function confirmDeleteProduct(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const modal = document.getElementById('modal-container');
+            modal.classList.remove('hidden');
+            modal.innerHTML = `
+                <div class="bg-white rounded-3xl w-full max-w-xs p-5 shadow-2xl border border-slate-100 text-center">
+                    <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-3">
+                        <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-sm mb-1">Delete Product?</h3>
+                    <p class="text-xs text-slate-500 mb-4">Are you sure you want to delete <strong class="text-slate-700">${product.name}</strong> from inventory?</p>
+                    
+                    <div class="flex space-x-2">
+                        <button onclick="closeModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-xl text-xs font-semibold transition">Cancel</button>
+                        <button onclick="deleteProduct('${productId}')" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white py-2.5 rounded-xl text-xs font-semibold shadow transition">Delete</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function deleteProduct(productId) {
+            products = products.filter(p => p.id !== productId);
+            saveData();
+            closeModal();
+            showToast('Product deleted from inventory.', 'error');
+            renderScreen();
+        }
+
+        function closeModal() {
+            document.getElementById('modal-container').classList.add('hidden');
+        }
+
+        let saleCart = [];
+
+        function renderSaleScreen(container) {
+            const cartTotal = saleCart.reduce((acc, curr) => acc + (curr.sellingPrice * curr.qty), 0);
+            
+            container.innerHTML = `
+                <div class="p-4 space-y-3 animate-fade-in">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Record Sale (Benta)</h2>
+                        <p class="text-xs text-slate-500">Select items sold to customers</p>
+                    </div>
+
+                    <!-- Product Selector / Search for Sale -->
+                    <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm space-y-3">
+                        <label class="block text-xs font-bold text-slate-700">Select Product to Add:</label>
+                        <select id="sale-product-select" onchange="previewSaleProduct(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-sari-600">
+                            <option value="">-- Choose item --</option>
+                            ${products.map(p => `<option value="${p.id}">${p.name} (${formatPeso(p.sellingPrice)} | Stock: ${p.stock})</option>`).join('')}
+                        </select>
+
+                        <div id="sale-item-controls" class="hidden space-y-2 pt-2 border-t border-slate-100">
+                            <div class="flex justify-between items-center text-xs">
+                                <span id="selected-prod-info" class="font-semibold text-slate-700"></span>
+                                <span id="selected-prod-stock" class="text-slate-500"></span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="flex-1">
+                                    <label class="block text-[10px] text-slate-400 mb-0.5">Quantity</label>
+                                    <input type="number" id="sale-qty-input" min="1" value="1" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-sari-600">
+                                </div>
+                                <button type="button" onclick="addToSaleCart()" class="mt-4 bg-sali-600 bg-sari-700 hover:bg-sari-800 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow transition">
+                                    <i class="fa-solid fa-cart-plus mr-1"></i> Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Cart Items -->
+                    <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm space-y-3">
+                        <h3 class="font-bold text-xs text-slate-800 uppercase tracking-wider">Transaction Items (${saleCart.length})</h3>
+
+                        ${saleCart.length === 0 ? `
+                            <div class="text-center py-6 text-slate-400">
+                                <i class="fa-solid fa-basket-shopping text-3xl mb-1 text-slate-300"></i>
+                                <p class="text-xs">No items added to current sale yet.</p>
+                            </div>
+                        ` : `
+                            <div class="space-y-2 max-h-44 overflow-y-auto pr-1">
+                                ${saleCart.map((item, index) => `
+                                    <div class="flex justify-between items-center p-2 bg-slate-50 rounded-xl border border-slate-100 text-xs">
+                                        <div class="flex-1 mr-2 truncate">
+                                            <p class="font-bold text-slate-800 truncate">${item.name}</p>
+                                            <span class="text-[10px] text-slate-500">${item.qty} x ${formatPeso(item.sellingPrice)}</span>
+                                        </div>
+                                        <div class="flex items-center space-x-3 shrink-0">
+                                            <span class="font-bold text-emerald-600">${formatPeso(item.sellingPrice * item.qty)}</span>
+                                            <button onclick="removeCartItem(${index})" class="text-rose-500 hover:text-rose-700 p-1"><i class="fa-solid fa-trash text-xs"></i></button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                            <div class="pt-3 border-t border-slate-100 flex justify-between items-center">
+                                <span class="font-bold text-sm text-slate-700">Total Amount:</span>
+                                <span class="font-extrabold text-base text-emerald-600">${formatPeso(cartTotal)}</span>
+                            </div>
+
+                            <button onclick="completeSaleTransaction()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl text-xs font-bold shadow-md transition flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-check-circle text-sm"></i>
+                                <span>Complete Sale & Deduct Stock</span>
+                            </button>
+                        `}
+                    </div>
+                </div>
+            `;
+        }
+
+        let currentSelectedProductForSale = null;
+
+        function previewSaleProduct(productId) {
+            const controls = document.getElementById('sale-item-controls');
+            if (!productId) {
+                controls.classList.add('hidden');
+                currentSelectedProductForSale = null;
+                return;
+            }
+            
+            currentSelectedProductForSale = products.find(p => p.id === productId);
+            if (currentSelectedProductForSale) {
+                controls.classList.remove('hidden');
+                document.getElementById('selected-prod-info').innerText = `${currentSelectedProductForSale.name} (${formatPeso(currentSelectedProductForSale.sellingPrice)})`;
+                document.getElementById('selected-prod-stock').innerText = `Available: ${currentSelectedProductForSale.stock}`;
+                document.getElementById('sale-qty-input').max = currentSelectedProductForSale.stock;
+                document.getElementById('sale-qty-input').value = 1;
+            }
+        }
+
+        function addToSaleCart() {
+            if (!currentSelectedProductForSale) return;
+            const qtyInput = document.getElementById('sale-qty-input');
+            const qty = parseInt(qtyInput.value);
+
+            if (isNaN(qty) || qty <= 0) {
+                showToast('Please enter a valid quantity.', 'error');
+                return;
+            }
+
+            if (qty > currentSelectedProductForSale.stock) {
+                showToast(`Cannot sell ${qty}! Only ${currentSelectedProductForSale.stock} left in stock.`, 'error');
+                return;
+            }
+
+            // Check if already in cart
+            const existingIndex = saleCart.findIndex(item => item.productId === currentSelectedProductForSale.id);
+            if (existingIndex !== -1) {
+                const newTotalQty = saleCart[existingIndex].qty + qty;
+                if (newTotalQty > currentSelectedProductForSale.stock) {
+                    showToast('Total quantity in cart exceeds available stock!', 'error');
+                    return;
+                }
+                saleCart[existingIndex].qty = newTotalQty;
+            } else {
+                saleCart.push({
+                    productId: currentSelectedProductForSale.id,
+                    name: currentSelectedProductForSale.name,
+                    sellingPrice: currentSelectedProductForSale.sellingPrice,
+                    costPrice: currentSelectedProductForSale.costPrice,
+                    qty: qty
+                });
+            }
+
+            showToast(`Added ${qty}x ${currentSelectedProductForSale.name} to sale.`);
+            renderScreen();
+        }
+
+        function removeCartItem(index) {
+            saleCart.splice(index, 1);
+            renderScreen();
+        }
+
+        function completeSaleTransaction() {
+            if (saleCart.length === 0) return;
+
+            let totalRevenue = 0;
+            let totalProfit = 0;
+            const transactionItems = [];
+
+            // Deduct from inventory and compute profit
+            saleCart.forEach(cartItem => {
+                const prodIndex = products.findIndex(p => p.id === cartItem.productId);
+                if (prodIndex !== -1) {
+                    products[prodIndex].stock -= cartItem.qty;
+                }
+
+                const revenue = cartItem.sellingPrice * cartItem.qty;
+                const profit = (cartItem.sellingPrice - cartItem.costPrice) * cartItem.qty;
+                
+                totalRevenue += revenue;
+                totalProfit += profit;
+
+                transactionItems.push({
+                    productId: cartItem.productId,
+                    name: cartItem.name,
+                    qty: cartItem.qty,
+                    price: cartItem.sellingPrice,
+                    cost: cartItem.costPrice
+                });
+            });
+
+            const newSale = {
+                id: 's_' + Date.now(),
+                timestamp: new Date().toISOString(),
+                items: transactionItems,
+                totalRevenue,
+                totalProfit
+            };
+
+            salesHistory.unshift(newSale);
+            saveData();
+
+            saleCart = [];
+            showToast('Sale recorded successfully! Inventory updated.');
+            renderScreen();
+        }
+
+        function renderRestockScreen(container) {
+            const lowStockProducts = products.filter(p => p.stock <= (p.minStock || storeSettings.lowStockThreshold));
+
+            container.innerHTML = `
+                <div class="p-4 space-y-3 animate-fade-in">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Restock Inventory (Dagdag Paninda)</h2>
+                        <p class="text-xs text-slate-500">Record newly purchased items from suppliers</p>
+                    </div>
+
+                    <!-- Low Stock Urgent Restock List -->
+                    <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+                        <h3 class="font-bold text-slate-800 text-xs flex items-center space-x-2">
+                            <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
+                            <span>Items Needing Restock (${lowStockProducts.length})</span>
+                        </h3>
+
+                        ${lowStockProducts.length === 0 ? `
+                            <div class="text-center py-6 text-slate-400">
+                                <i class="fa-solid fa-circle-check text-3xl mb-1 text-emerald-500"></i>
+                                <p class="text-xs font-medium text-slate-600">All inventory levels are looking healthy!</p>
+                            </div>
+                        ` : `
+                            <div class="space-y-2">
+                                ${lowStockProducts.map(product => {
+                                    const status = getStockStatus(product);
+                                    return `
+                                        <div class="flex items-center justify-between p-3 bg-amber-50/50 rounded-xl border border-amber-100">
+                                            <div class="min-w-0 flex-1 mr-2">
+                                                <div class="flex items-center space-x-2 mb-0.5">
+                                                    <span class="text-[10px] bg-white text-slate-600 px-1.5 py-0.5 rounded border border-slate-200">${product.category}</span>
+                                                    <span class="text-[10px] font-bold text-rose-600">Qty: ${product.stock}</span>
+                                                </div>
+                                                <h4 class="font-bold text-xs text-slate-800 truncate">${product.name}</h4>
+                                            </div>
+                                            <button onclick="openRestockModal('${product.id}')" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-xl text-xs font-semibold shadow-sm transition shrink-0">
+                                                <i class="fa-solid fa-plus mr-1"></i> Restock
+                                            </button>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        `}
+                    </div>
+
+                    <!-- All Products Restock Quick Grid -->
+                    <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+                        <h3 class="font-bold text-slate-800 text-xs">All Other Products</h3>
+                        <div class="space-y-2">
+                            ${products.filter(p => p.stock > (p.minStock || storeSettings.lowStockThreshold)).map(product => `
+                                <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-xs">
+                                    <div class="min-w-0 flex-1 mr-2">
+                                        <h4 class="font-semibold text-slate-800 truncate">${product.name}</h4>
+                                        <span class="text-[10px] text-slate-500">Current Stock: <strong class="text-emerald-700">${product.stock}</strong></span>
+                                    </div>
+                                    <button onclick="openRestockModal('${product.id}')" class="bg-slate-200 hover:bg-sari-600 hover:text-white text-slate-700 px-3 py-1.5 rounded-xl font-semibold transition shrink-0">
+                                        Restock
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openRestockModal(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const modal = document.getElementById('modal-container');
+            modal.classList.remove('hidden');
+            modal.innerHTML = `
+                <div class="bg-white rounded-3xl w-full max-w-sm p-5 shadow-2xl border border-slate-100 animate-scale-up">
+                    <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center space-x-2">
+                            <i class="fa-solid fa-truck-ramp-box text-sari-600"></i>
+                            <span>Restock Product</span>
+                        </h3>
+                        <button onclick="closeModal()" class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center transition">
+                            <i class="fa-solid fa-xmark text-xs"></i>
+                        </button>
+                    </div>
+
+                    <div class="mb-3 bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-xs">
+                        <p class="font-bold text-slate-800">${product.name}</p>
+                        <p class="text-slate-500 mt-0.5">Current Stock: <strong class="text-slate-700">${product.stock}</strong></p>
+                    </div>
+
+                    <form onsubmit="handleRestockSubmit(event, '${productId}')" class="space-y-3">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Add Quantity Purchased</label>
+                            <input type="number" min="1" id="restock-qty-add" required placeholder="e.g., 20" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-sari-600">
+                        </div>
+
+                        <div class="flex space-x-2 pt-2">
+                            <button type="button" onclick="closeModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-xl text-xs font-semibold transition">Cancel</button>
+                            <button type="submit" class="flex-1 bg-sari-600 hover:bg-sari-700 text-white py-2.5 rounded-xl text-xs font-semibold shadow transition">Confirm Restock</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+        }
+
+        function handleRestockSubmit(e, productId) {
+            e.preventDefault();
+            const qtyAdd = parseInt(document.getElementById('restock-qty-add').value);
+
+            if (isNaN(qtyAdd) || qtyAdd <= 0) {
+                showToast('Please enter a valid quantity.', 'error');
+                return;
+            }
+
+            const index = products.findIndex(p => p.id === productId);
+            if (index !== -1) {
+                products[index].stock += qtyAdd;
+                saveData();
+                closeModal();
+                showToast(`Successfully added ${qtyAdd} units to stock!`);
+                renderScreen();
+            }
+        }
+
+        function renderHistoryScreen(container) {
+            const todayStr = new Date().toDateString();
+            const todaySales = salesHistory.filter(s => new Date(s.timestamp).toDateString() === todayStr);
+            const todayRevenue = todaySales.reduce((acc, curr) => acc + curr.totalRevenue, 0);
+            const todayProfit = todaySales.reduce((acc, curr) => acc + curr.totalProfit, 0);
+
+            container.innerHTML = `
+                <div class="p-4 space-y-3 animate-fade-in">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Sales History & Reports</h2>
+                        <p class="text-xs text-slate-500">Track revenue and estimated profits</p>
+                    </div>
+
+                    <!-- Daily Summary Card -->
+                    <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-4 text-white shadow-md space-y-3">
+                        <div class="flex justify-between items-center text-xs text-slate-300 border-b border-slate-700 pb-2">
+                            <span>Today's Summary</span>
+                            <span>${new Date().toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <span class="text-[10px] text-slate-400 uppercase tracking-wider">Total Revenue</span>
+                                <h4 class="text-base font-bold text-emerald-400 mt-0.5">${formatPeso(todayRevenue)}</h4>
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-400 uppercase tracking-wider">Estimated Profit</span>
+                                <h4 class="text-base font-bold text-sari-400 mt-0.5">${formatPeso(todayProfit)}</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transaction List Header & Clear -->
+                    <div class="flex justify-between items-center pt-1">
+                        <h3 class="font-bold text-slate-800 text-xs">All Recorded Transactions (${salesHistory.length})</h3>
+                        ${salesHistory.length > 0 ? `
+                            <button onclick="confirmClearHistory()" class="text-rose-600 hover:underline text-[11px] font-semibold">Clear History</button>
+                        ` : ''}
+                    </div>
+
+                    <!-- Transactions List -->
+                    ${salesHistory.length === 0 ? `
+                        <div class="text-center py-12 bg-white rounded-2xl border border-slate-200 p-6">
+                            <i class="fa-solid fa-receipt text-4xl text-slate-300 mb-2"></i>
+                            <h3 class="font-bold text-slate-700 text-sm">No sales history yet</h3>
+                            <p class="text-xs text-slate-400 mt-1">Completed sales will appear here automatically.</p>
+                        </div>
+                    ` : `
+                        <div class="space-y-2.5">
+                            ${salesHistory.map(sale => {
+                                const time = new Date(sale.timestamp).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                                return `
+                                    <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm space-y-2">
+                                        <div class="flex justify-between items-center text-xs border-b border-slate-100 pb-2">
+                                            <span class="text-slate-400 font-medium"><i class="fa-regular fa-clock mr-1"></i>${time}</span>
+                                            <div class="space-x-2">
+                                                <span class="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-bold">Rev: ${formatPeso(sale.totalRevenue)}</span>
+                                                <span class="text-[10px] bg-sari-50 text-sari-700 px-2 py-0.5 rounded font-bold">Profit: ${formatPeso(sale.totalProfit)}</span>
+                                            </div>
+                                        </div>
+                                        <div class="space-y-1">
+                                            ${sale.items.map(item => `
+                                                <div class="flex justify-between text-xs text-slate-700">
+                                                    <span>${item.qty}x ${item.name}</span>
+                                                    <span class="font-medium">${formatPeso(item.price * item.qty)}</span>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+
+        function confirmClearHistory() {
+            const modal = document.getElementById('modal-container');
+            modal.classList.remove('hidden');
+            modal.innerHTML = `
+                <div class="bg-white rounded-3xl w-full max-w-xs p-5 shadow-2xl border border-slate-100 text-center">
+                    <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-3">
+                        <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-sm mb-1">Clear Sales History?</h3>
+                    <p class="text-xs text-slate-500 mb-4">This action will delete all recorded transactions. This cannot be undone.</p>
+                    
+                    <div class="flex space-x-2">
+                        <button onclick="closeModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-xl text-xs font-semibold transition">Cancel</button>
+                        <button onclick="clearSalesHistory()" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white py-2.5 rounded-xl text-xs font-semibold shadow transition">Clear All</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function clearSalesHistory() {
+            salesHistory = [];
+            saveData();
+            closeModal();
+            showToast('Sales history cleared.', 'error');
+            renderScreen();
+        }
+
+        function renderSettingsScreen(container) {
+            container.innerHTML = `
+                <div class="p-4 space-y-4 animate-fade-in">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Store Settings</h2>
+                        <p class="text-xs text-slate-500">Configure your store information and demo data</p>
+                    </div>
+
+                    <!-- Store Info Form -->
+                    <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+                        <h3 class="font-bold text-slate-800 text-xs flex items-center space-x-2">
+                            <i class="fa-solid fa-store text-sari-600"></i>
+                            <span>Store Profile</span>
+                        </h3>
+
+                        <form onsubmit="handleSaveSettings(event)" class="space-y-3">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Store Name</label>
+                                <input type="text" id="setting-store-name" required value="${storeSettings.storeName}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-sari-600">
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Owner Name</label>
+                                <input type="text" id="setting-owner-name" required value="${storeSettings.ownerName}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-sari-600">
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Global Low-Stock Threshold Default</label>
+                                <input type="number" min="1" id="setting-low-stock" required value="${storeSettings.lowStockThreshold}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-sari-600">
+                            </div>
+
+                            <button type="submit" class="w-full bg-sari-600 hover:bg-sari-700 text-white py-2.5 rounded-xl text-xs font-semibold shadow transition">
+                                Save Settings
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Reset Demo Data Card -->
+                    <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-2">
+                        <h3 class="font-bold text-slate-800 text-xs">Reset Demonstration Data</h3>
+                        <p class="text-xs text-slate-500">Restore default sari-sari store products and demo sales history.</p>
+                        <button onclick="confirmResetDemoData()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 py-2.5 rounded-xl text-xs font-semibold transition mt-2">
+                            <i class="fa-solid fa-rotate-right mr-1"></i> Reset Demo Data
+                        </button>
+                    </div>
+
+                    <div class="text-center py-2 text-[11px] text-slate-400">
+                        <p>SariStock v1.0 • Built for Philippine Sari-Sari Stores</p>
+                        <p class="mt-0.5">Ready for MIT App Inventor Recreation</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleSaveSettings(e) {
+            e.preventDefault();
+            storeSettings.storeName = document.getElementById('setting-store-name').value.trim();
+            storeSettings.ownerName = document.getElementById('setting-owner-name').value.trim();
+            storeSettings.lowStockThreshold = parseInt(document.getElementById('setting-low-stock').value);
+
+            saveData();
+            showToast('Settings saved successfully!');
+            renderScreen();
+        }
+
+        function confirmResetDemoData() {
+            const modal = document.getElementById('modal-container');
+            modal.classList.remove('hidden');
+            modal.innerHTML = `
+                <div class="bg-white rounded-3xl w-full max-w-xs p-5 shadow-2xl border border-slate-100 text-center">
+                    <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-3">
+                        <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-sm mb-1">Reset Demo Data?</h3>
+                    <p class="text-xs text-slate-500 mb-4">This will overwrite all current products and sales history with default sari-sari store sample data.</p>
+                    
+                    <div class="flex space-x-2">
+                        <button onclick="closeModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-xl text-xs font-semibold transition">Cancel</button>
+                        <button onclick="resetDemoData()" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white py-2.5 rounded-xl text-xs font-semibold shadow transition">Reset</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function resetDemoData() {
+            storeSettings = { ...DEFAULT_SETTINGS };
+            products = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+            salesHistory = JSON.parse(JSON.stringify(DEFAULT_SALES));
+            saveData();
+            closeModal();
+            showToast('Demo data successfully restored!');
+            renderScreen();
+        }
+
+        // Initial render on load
+        window.onload = function() {
+            renderScreen();
+        };
+    </script>
+</body>
+</html>
